@@ -120,31 +120,72 @@ class PostHog_For_WP_Forms_Tracker {
 
 		$form_name = 'elementor_form';
 		if ( method_exists( $record, 'get_form_settings' ) ) {
-			$settings = $record->get_form_settings();
-			$form_name = isset( $settings['form_name'] ) ? sanitize_text_field( $settings['form_name'] ) : 'elementor_form';
+			$raw_name = $record->get_form_settings( 'form_name' );
+			$form_name = ! empty( $raw_name ) ? sanitize_text_field( $raw_name ) : 'elementor_form';
 		}
 
-		$fields = array();
+		$fields        = array();
+		$submit_email  = '';
+		$submit_first  = '';
+		$submit_last   = '';
+
 		if ( method_exists( $record, 'get' ) ) {
 			$raw = $record->get( 'fields' );
 			if ( is_array( $raw ) ) {
 				foreach ( $raw as $field ) {
-					if ( isset( $field['title'], $field['value'] ) ) {
-						$fields[ sanitize_text_field( $field['title'] ) ] = sanitize_text_field( (string) $field['value'] );
+					if ( ! isset( $field['title'], $field['value'] ) ) {
+						continue;
+					}
+					$key   = sanitize_text_field( $field['title'] );
+					$value = sanitize_text_field( (string) $field['value'] );
+					$fields[ $key ] = $value;
+
+					// Detect common field types by Elementor field type or label.
+					$type  = isset( $field['type'] ) ? strtolower( $field['type'] ) : '';
+					$id    = isset( $field['id'] ) ? strtolower( $field['id'] ) : '';
+					$label = strtolower( $key );
+
+					if ( 'email' === $type || false !== strpos( $id, 'email' ) || false !== strpos( $label, 'email' ) ) {
+						if ( is_email( $value ) ) {
+							$submit_email = $value;
+						}
+					}
+					if ( false !== strpos( $label, 'first' ) || 'first_name' === $id ) {
+						$submit_first = $value;
+					}
+					if ( false !== strpos( $label, 'last' ) || 'last_name' === $id ) {
+						$submit_last = $value;
 					}
 				}
 			}
 		}
 
+		// Use the submitted email as the distinct ID when available,
+		// so the event is attributed to the lead, not the logged-in admin.
+		$distinct_id = ! empty( $submit_email ) ? $submit_email : $this->get_distinct_id();
+
+		$properties = array(
+			'form_provider' => 'elementor',
+			'form_name'     => $form_name,
+			'fields'        => $fields,
+			'$current_url'  => $this->get_current_url(),
+		);
+
+		// Promote key form values to top-level properties for easy filtering.
+		if ( ! empty( $submit_email ) ) {
+			$properties['email'] = $submit_email;
+		}
+		if ( ! empty( $submit_first ) ) {
+			$properties['first_name'] = $submit_first;
+		}
+		if ( ! empty( $submit_last ) ) {
+			$properties['last_name'] = $submit_last;
+		}
+
 		$this->api->capture(
-			$this->get_distinct_id(),
+			$distinct_id,
 			$this->get_event_name(),
-			array(
-				'form_provider' => 'elementor',
-				'form_name'     => $form_name,
-				'fields'        => $fields,
-				'$current_url'  => $this->get_current_url(),
-			)
+			$properties
 		);
 	}
 
