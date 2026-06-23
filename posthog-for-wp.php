@@ -3,7 +3,7 @@
  * Plugin Name: PostHog for WordPress
  * Plugin URI: https://github.com/ashawkat/posthog-for-wordpress
  * Description: Send WooCommerce events to PostHog with customizable event names. Integrates with PostHog for unified analytics across platforms.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Launchtitans Team
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'POSTHOG_FOR_WP_VERSION', '1.0.0' );
+define( 'POSTHOG_FOR_WP_VERSION', '1.0.1' );
 define( 'POSTHOG_FOR_WP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
 /**
@@ -69,14 +69,17 @@ function posthog_for_wp_init() {
 	}
 
 	require_once POSTHOG_FOR_WP_PLUGIN_DIR . 'includes/class-posthog-api.php';
+	require_once POSTHOG_FOR_WP_PLUGIN_DIR . 'includes/class-posthog-session.php';
 	require_once POSTHOG_FOR_WP_PLUGIN_DIR . 'includes/class-posthog-tracker.php';
 	require_once POSTHOG_FOR_WP_PLUGIN_DIR . 'includes/class-posthog-forms-tracker.php';
+	require_once POSTHOG_FOR_WP_PLUGIN_DIR . 'includes/class-posthog-frontend.php';
 
 	if ( is_admin() ) {
 		require_once POSTHOG_FOR_WP_PLUGIN_DIR . 'includes/class-posthog-admin.php';
 		new PostHog_For_WP_Admin();
 	}
 
+	new PostHog_For_WP_Frontend();
 	new PostHog_For_WP_Tracker();
 	new PostHog_For_WP_Forms_Tracker();
 }

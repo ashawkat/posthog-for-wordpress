@@ -196,6 +196,18 @@ class PostHog_For_WP_Admin {
 							<p class="description"><?php esc_html_e( 'Unique identifier sent to PostHog. Use the same source as your other platform for unified user tracking.', 'posthog-for-wp' ); ?></p>
 						</td>
 					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Session IDs', 'posthog-for-wp' ); ?></th>
+						<td>
+							<p class="description">
+								<?php
+								echo wp_kses_post(
+									__( 'Server-side events automatically include <code>$session_id</code>. If you also use posthog-js on the frontend, enable <code>tracing_headers</code> in your PostHog init so AJAX requests send <code>X-POSTHOG-SESSION-ID</code>. See the <a href="https://posthog.com/docs/data/sessions#automatically-sending-session-ids" target="_blank" rel="noopener noreferrer">PostHog sessions docs</a>.', 'posthog-for-wp' )
+								);
+								?>
+							</p>
+						</td>
+					</tr>
 				</table>
 
 				<h2><?php esc_html_e( 'Custom event names', 'posthog-for-wp' ); ?></h2>

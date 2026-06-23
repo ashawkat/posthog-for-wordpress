@@ -70,6 +70,8 @@ class PostHog_For_WP_API {
 			return new WP_Error( 'posthog_invalid_params', __( 'distinct_id and event are required.', 'posthog-for-wp' ) );
 		}
 
+		$properties = $this->with_session_properties( $properties );
+
 		$payload = array(
 			'api_key'     => $this->api_key,
 			'event'       => sanitize_text_field( $event ),
@@ -123,6 +125,9 @@ class PostHog_For_WP_API {
 
 		$batch = array();
 		foreach ( $events as $ev ) {
+			$event_properties = isset( $ev['properties'] ) ? $ev['properties'] : array();
+			$event_properties = $this->with_session_properties( $event_properties );
+
 			$batch[] = array(
 				'event'      => sanitize_text_field( $ev['event'] ),
 				'properties' => array_merge(
@@ -130,7 +135,7 @@ class PostHog_For_WP_API {
 						'distinct_id' => (string) $distinct_id,
 						'$source'     => 'posthog-for-wp',
 					),
-					isset( $ev['properties'] ) ? $ev['properties'] : array()
+					$event_properties
 				),
 			);
 		}
@@ -161,5 +166,26 @@ class PostHog_For_WP_API {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Attach PostHog session properties to an event payload.
+	 *
+	 * @param array $properties Event properties.
+	 * @return array
+	 */
+	private function with_session_properties( $properties ) {
+		if ( ! is_array( $properties ) ) {
+			$properties = array();
+		}
+
+		if ( empty( $properties['$session_id'] ) && class_exists( 'PostHog_For_WP_Session' ) ) {
+			$session_id = PostHog_For_WP_Session::get_session_id();
+			if ( ! empty( $session_id ) ) {
+				$properties['$session_id'] = $session_id;
+			}
+		}
+
+		return $properties;
 	}
 }
