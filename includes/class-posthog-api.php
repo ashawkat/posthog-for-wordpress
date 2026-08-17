@@ -54,6 +54,24 @@ class PostHog_For_WP_API {
 	}
 
 	/**
+	 * Get the project API key.
+	 *
+	 * @return string
+	 */
+	public function get_api_key() {
+		return $this->api_key;
+	}
+
+	/**
+	 * Get the PostHog host URL.
+	 *
+	 * @return string
+	 */
+	public function get_host() {
+		return $this->host;
+	}
+
+	/**
 	 * Capture a single event.
 	 *
 	 * @param string       $distinct_id Unique identifier for the user.

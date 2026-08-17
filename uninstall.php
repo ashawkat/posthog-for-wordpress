@@ -10,6 +10,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 delete_option( 'posthog_for_wp_enabled' );
+delete_option( 'posthog_for_wp_js_enabled' );
 delete_option( 'posthog_for_wp_api_key' );
 delete_option( 'posthog_for_wp_host' );
 delete_option( 'posthog_for_wp_distinct_id_source' );

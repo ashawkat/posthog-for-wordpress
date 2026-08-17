@@ -107,6 +107,16 @@ class PostHog_For_WP_Admin {
 
 		register_setting(
 			self::OPTION_GROUP,
+			'posthog_for_wp_js_enabled',
+			array(
+				'type'              => 'boolean',
+				'default'           => true,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			)
+		);
+
+		register_setting(
+			self::OPTION_GROUP,
 			'posthog_for_wp_distinct_id_source',
 			array(
 				'type'              => 'string',
@@ -149,6 +159,7 @@ class PostHog_For_WP_Admin {
 	 */
 	public function render_settings_page() {
 		$enabled        = (bool) get_option( 'posthog_for_wp_enabled', false );
+		$js_enabled     = (bool) get_option( 'posthog_for_wp_js_enabled', true );
 		$api_key        = get_option( 'posthog_for_wp_api_key', '' );
 		$host           = get_option( 'posthog_for_wp_host', 'https://us.i.posthog.com' );
 		$distinct_source = get_option( 'posthog_for_wp_distinct_id_source', 'user_id' );
@@ -197,14 +208,15 @@ class PostHog_For_WP_Admin {
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Session IDs', 'posthog-for-wp' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'JavaScript SDK & session replay', 'posthog-for-wp' ); ?></th>
 						<td>
+							<label>
+								<input type="hidden" name="posthog_for_wp_js_enabled" value="0" />
+								<input type="checkbox" name="posthog_for_wp_js_enabled" value="1" <?php checked( $js_enabled ); ?> />
+								<?php esc_html_e( 'Load posthog-js in the browser (required for session recordings)', 'posthog-for-wp' ); ?>
+							</label>
 							<p class="description">
-								<?php
-								echo wp_kses_post(
-									__( 'Server-side events automatically include <code>$session_id</code>. If you also use posthog-js on the frontend, enable <code>tracing_headers</code> in your PostHog init so AJAX requests send <code>X-POSTHOG-SESSION-ID</code>. See the <a href="https://posthog.com/docs/data/sessions#automatically-sending-session-ids" target="_blank" rel="noopener noreferrer">PostHog sessions docs</a>.', 'posthog-for-wp' )
-								);
-								?>
+								<?php esc_html_e( 'PHP events cannot record sessions. This snippet loads the official PostHog JavaScript SDK, enables session replay, and sends tracing headers so AJAX events share the same session ID. Turn this off if you already inject posthog-js from a theme, GTM, or another plugin.', 'posthog-for-wp' ); ?>
 							</p>
 						</td>
 					</tr>

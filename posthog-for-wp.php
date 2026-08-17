@@ -3,7 +3,7 @@
  * Plugin Name: PostHog for WordPress
  * Plugin URI: https://github.com/ashawkat/posthog-for-wordpress
  * Description: Send WooCommerce events to PostHog with customizable event names. Integrates with PostHog for unified analytics across platforms.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Launchtitans Team
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'POSTHOG_FOR_WP_VERSION', '1.0.1' );
+define( 'POSTHOG_FOR_WP_VERSION', '1.1.0' );
 define( 'POSTHOG_FOR_WP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
 /**
